@@ -30,8 +30,6 @@ process.on('unhandledRejection', (reason, promise) => {
 })
 
 const programStart = async () => {
-  await deleteAllRules()
-
   let throttler = new Throttler()
   await throttler.start()
 
