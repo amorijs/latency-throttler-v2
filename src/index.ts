@@ -39,7 +39,7 @@ const programStart = async () => {
     }
 
     try {
-      logInfo(`Throttler #${throttler.id} disconnected. Creating new throttler...`)
+      logInfo(`Throttler #${throttler.id} disconnected.`)
       await throttler.stop()
     } catch (err) {
       logError(`
@@ -49,6 +49,7 @@ const programStart = async () => {
       process.exit(1)
     }
 
+    logInfo('Creating new throttler...')
     throttler = new Throttler()
     await throttler.start()
   }, 15000)
