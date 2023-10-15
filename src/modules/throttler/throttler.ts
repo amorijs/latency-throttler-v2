@@ -132,6 +132,7 @@ export class Throttler implements IThrottler {
             const newDelay = Math.max(Math.min(currentDelay + delayToAdd, this.minPing), 0)
 
             this.playfabsToLastDelay[playerInfo.playfab] = newDelay
+            this.playfabsToIps[playerInfo.playfab] = playerInfo.ip
 
             if (newDelay > 0 && currentDelay !== newDelay) {
               return { playerInfo, delay: newDelay }
@@ -154,6 +155,8 @@ export class Throttler implements IThrottler {
             this.trafficRuleQueue.updateIndex(indexOfItemInQueue, trafficRuleUpdate)
           }
         })
+
+        playerInfoList.forEach(({ ip, ping, playfab }) => {})
 
         this.report()
       })

@@ -27,9 +27,5 @@ export const getPlayfabsToIps = async (): Promise<PlayfabsToIps> => {
       output[playfab] = ip
     })
 
-  logInfo(`*******FORMATTED IP LIST********`)
-  logInfo(JSON.stringify(output, null, 2))
-  logInfo('********************************')
-
   return output
 }
