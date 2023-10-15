@@ -104,6 +104,7 @@ export class Throttler implements IThrottler {
     }
 
     this.isRunning = true
+    await deleteAllRules()
     this.rcon = await getRcon()
 
     if (!this.isRconConnected()) {
@@ -190,6 +191,7 @@ export class Throttler implements IThrottler {
 
     await this.rcon?.socket?.removeAllListeners()
     await this.rcon?.socket?.destroy()
+    await deleteAllRules()
 
     this.isRunning = false
   }
