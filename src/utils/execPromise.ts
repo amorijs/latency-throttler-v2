@@ -16,11 +16,7 @@ export const execPromise = (command: string): Promise<any> => {
         return reject(stderr)
       }
 
-      if (stdout) {
-        return resolve(stdout)
-      }
-
-      reject(new Error('stdout does not exist'))
+      resolve(stdout)
     })
   })
 }
