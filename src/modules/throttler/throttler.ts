@@ -86,11 +86,11 @@ export class Throttler implements IThrottler {
     const prefix = `[Throttler #${this.id}] `
 
     if (type === 'info') {
-      logInfo(prefix, ...args)
+      logInfo(...args)
     } else if (type === 'error') {
-      logError(prefix, ...args)
+      logError(...args)
     } else {
-      logError(prefix, `Unknown log type: ${type}`)
+      logError(`Unknown log type: ${type}`)
     }
   }
 
@@ -181,17 +181,15 @@ export class Throttler implements IThrottler {
         this.ipsThrottled.delete(ip)
       }
     }, this.trafficRuleUpdateRate)
+
+    logInfo('Throttler started!')
   }
 
-  async stop(deleteRules: boolean) {
+  async stop() {
     this.clearAllIntervals()
 
     await this.rcon?.socket?.removeAllListeners()
     await this.rcon?.socket?.destroy()
-
-    if (deleteRules) {
-      await deleteAllRules()
-    }
 
     this.isRunning = false
   }

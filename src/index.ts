@@ -1,6 +1,7 @@
 import { formatISO9075, sub } from 'date-fns'
 import dotenv from 'dotenv'
 import { Throttler } from './modules/throttler/throttler'
+import { deleteAllRules } from './modules/throttler/utils'
 
 dotenv.config()
 
@@ -29,6 +30,8 @@ process.on('unhandledRejection', (reason, promise) => {
 })
 
 const programStart = async () => {
+  await deleteAllRules()
+
   let throttler = new Throttler()
   await throttler.start()
 
@@ -39,7 +42,7 @@ const programStart = async () => {
 
     try {
       logInfo(`Throttler #${throttler.id} disconnected. Creating new throttler...`)
-      await throttler.stop(true)
+      await throttler.stop()
     } catch (err) {
       logError(`
           Could not stop throttler #${throttler.id}
@@ -53,8 +56,6 @@ const programStart = async () => {
   }, 15000)
 
   // let rconChatHandler = null
-
-  logInfo('Throttler started!')
 }
 
 programStart()
