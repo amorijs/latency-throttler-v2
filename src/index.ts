@@ -29,8 +29,31 @@ process.on('unhandledRejection', (reason, promise) => {
 })
 
 const programStart = async () => {
-  const throttler = new Throttler()
+  let throttler = new Throttler()
   await throttler.start()
+
+  setInterval(async () => {
+    if (throttler.isRconConnected()) {
+      return
+    }
+
+    try {
+      logInfo(`Throttler #${throttler.id} disconnected. Creating new throttler...`)
+      await throttler.stop(true)
+    } catch (err) {
+      logError(`
+          Could not stop throttler #${throttler.id}
+          Error: ${JSON.stringify(err ?? {})}
+        `)
+      process.exit(1)
+    }
+
+    throttler = new Throttler()
+    await throttler.start()
+  }, 15000)
+
+  // let rconChatHandler = null
+
   logInfo('Throttler started!')
 }
 
