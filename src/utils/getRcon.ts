@@ -54,5 +54,3 @@ export const getRcon = async (wait = 0): Promise<Rcon> => {
     return getRcon(10000)
   }
 }
-
-module.exports = getRcon
