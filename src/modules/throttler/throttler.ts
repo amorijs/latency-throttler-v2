@@ -154,6 +154,8 @@ export class Throttler implements IThrottler {
             this.trafficRuleQueue.updateIndex(indexOfItemInQueue, trafficRuleUpdate)
           }
         })
+
+        this.report()
       })
     }, this.pollRate)
 
