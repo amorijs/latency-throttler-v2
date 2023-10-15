@@ -1,10 +1,12 @@
 /* eslint-env node */
 module.exports = {
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'airbnb', 'prettier'],
+  globals: { logInfo: 'readonly', logError: 'readonly' },
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
   root: true,
   rules: {
+    'arrow-body-style': 'off',
     'class-methods-use-this': 'off',
     'consistent-return': 'off',
     curly: [2, 'all'],
@@ -25,6 +27,7 @@ module.exports = {
     'no-useless-constructor': 'off',
     'no-use-before-define': 'off',
     '@typescript-eslint/ban-ts-comment': 'warn',
+    '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-shadow': ['error'],
     '@typescript-eslint/no-unused-vars': 'off',
     '@typescript-eslint/no-use-before-define': ['error'],
