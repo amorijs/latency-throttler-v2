@@ -34,7 +34,11 @@ export const deleteRule = async (ip: string): Promise<void> => {
 }
 
 export const deleteAllRules = async (): Promise<void> => {
-  const networkInterfaceId = await getNetworkInterfaceId()
+  try {
+    const networkInterfaceId = await getNetworkInterfaceId()
+  } catch (err) {
+    logError('DELETE ALL RULES', { err })
+  }
   const command = `tcdel ${networkInterfaceId} --all`
   return execPromise(command)
 }
