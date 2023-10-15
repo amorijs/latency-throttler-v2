@@ -38,7 +38,16 @@ export const deleteAllRules = async (): Promise<void> => {
     const networkInterfaceId = await getNetworkInterfaceId()
     const command = `tcdel ${networkInterfaceId} --all`
     await execPromise(command)
-  } catch (err) {
-    logError('DELETE ALL RULES', { err })
+  } catch (err: any) {
+    const dontThrowString = 'no qdisc to delete for the outgoing device'
+
+    if (
+      (typeof err === 'string' && err.includes(dontThrowString)) ||
+      (typeof err?.message === 'string' && err.message.includes(dontThrowString))
+    ) {
+      return
+    }
+
+    throw new Error(err)
   }
 }
