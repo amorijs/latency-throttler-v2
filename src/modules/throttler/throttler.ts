@@ -39,7 +39,7 @@ export class Throttler implements IThrottler {
 
   pollRate: number = POLL_RATE ? Number.parseInt(`${POLL_RATE}`, 10) : 6000
 
-  trafficRuleUpdateRate = TRAFFIC_RULE_UPDATE_RATE
+  trafficRuleUpdateRate: number = TRAFFIC_RULE_UPDATE_RATE
     ? Number.parseInt(`${TRAFFIC_RULE_UPDATE_RATE}`, 10)
     : 1000
 
@@ -83,8 +83,6 @@ export class Throttler implements IThrottler {
   }
 
   log(type: 'info' | 'error', ...args: any[]) {
-    const prefix = `[Throttler #${this.id}] `
-
     if (type === 'info') {
       logInfo(...args)
     } else if (type === 'error') {
