@@ -38,6 +38,7 @@ export class ChatController {
 
     if (parsed.includes('logged in') && parsed.includes('Login:')) {
       logInfo('Sending', parsed)
+      const loginMessage = parsed.split(':')
       return this.rcon?.send(`say ${parsed}`)
     }
 

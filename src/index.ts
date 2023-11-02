@@ -2,6 +2,7 @@ import { formatISO9075, sub } from 'date-fns'
 import dotenv from 'dotenv'
 import { Throttler } from './classes/Throttler/Throttler'
 import { ChatController } from './classes/ChatController/ChatController'
+import { deleteAllRules } from './classes/Throttler/helpers'
 
 dotenv.config()
 
@@ -36,9 +37,14 @@ const programStart = async () => {
   await throttler.start()
   await chatController.start()
 
-  chatController.onSetMinPing = (minPing: number) => {
-    throttler.minPing = minPing
-    logInfo(`Set throttler #${throttler.id} min ping to ${minPing}`)
+  chatController.onSetMinPing = async (minPing: number) => {
+    try {
+      await deleteAllRules()
+      throttler.minPing = minPing
+      logInfo(`Set throttler #${throttler.id} min ping to ${minPing}`)
+    } catch (err) {
+      logError('Error while setting min ping', err)
+    }
   }
 
   setInterval(async () => {
