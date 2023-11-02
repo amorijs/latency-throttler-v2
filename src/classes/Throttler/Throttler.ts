@@ -55,6 +55,8 @@ export class Throttler {
 
     // For each ip, check if their ping is under minimum. If so, create a traffic rule
     const delayPromises = playerInfoList.map(async (playerInfo) => {
+      this.playfabsToIps[playerInfo.playfab] = playerInfo.ip
+
       const currentDelay = this.playfabsToLastDelay[playerInfo.playfab] ?? 0
       const delayToAdd =
         playerInfo.ping > 0
@@ -64,9 +66,6 @@ export class Throttler {
             )
           : 0
       const newDelay = Math.max(Math.min(currentDelay + delayToAdd, this.minPing), 0)
-
-      this.playfabsToLastDelay[playerInfo.playfab] = newDelay
-      this.playfabsToIps[playerInfo.playfab] = playerInfo.ip
 
       if (newDelay > 0 && currentDelay !== newDelay) {
         return { playerInfo, delay: newDelay }
@@ -164,9 +163,11 @@ export class Throttler {
 
       if (trafficRuleUpdate.delay > 0) {
         await addOrChangeRule(ip, trafficRuleUpdate.delay)
+        this.playfabsToLastDelay[trafficRuleUpdate.playerInfo.playfab] = trafficRuleUpdate.delay
         this.ipsThrottled.add(ip)
       } else if (this.ipsThrottled.has(ip)) {
         await deleteRule(ip)
+        this.playfabsToLastDelay[trafficRuleUpdate.playerInfo.playfab] = 0
         this.ipsThrottled.delete(ip)
       }
     }, this.trafficRuleUpdateRate)
