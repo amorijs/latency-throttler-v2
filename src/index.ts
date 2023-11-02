@@ -42,7 +42,7 @@ const programStart = async () => {
 
     try {
       logInfo(`Throttler #${throttler.id} disconnected.`)
-      await throttler.stop()
+      throttler.stop()
     } catch (err) {
       logError(`
           Could not stop throttler #${throttler.id}

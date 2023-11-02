@@ -184,13 +184,10 @@ export class Throttler implements IThrottler {
     logInfo('Throttler started!')
   }
 
-  async stop() {
+  stop() {
     this.clearAllIntervals()
-
-    await this.rcon?.socket?.removeAllListeners()
-    await this.rcon?.socket?.destroy()
-    await deleteAllRules()
-
+    this.rcon?.socket?.removeAllListeners()
+    this.rcon?.socket?.destroy()
     this.isRunning = false
   }
 }
