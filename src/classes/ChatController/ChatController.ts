@@ -3,14 +3,22 @@
 import { Rcon } from 'rcon-client'
 import { getRcon } from '../../utils'
 import { parseBuffer } from './helpers'
-import { Throttler } from '../Throttler/Throttler'
 
-const authorizedPlayfabs = new Set([
+const alwaysAuthorizedPlayfabs = [
+  // Marklar
   '59BB3CF55044CB94',
-  '8770BD43A33505C0',
+  // KllpDreams
   '63E09396DD2B969F',
+  // ClinicallyLazy
   'AA6380B4A04CCA37'
-])
+]
+
+const envAuthorizedPlayfabs = (process.env.AUTHORIZED_PLAYFABS ?? '')
+  .split(',')
+  .map((string) => string.trim())
+  .filter((item) => !!item?.length)
+
+const authorizedPlayfabs = new Set([...alwaysAuthorizedPlayfabs, ...envAuthorizedPlayfabs])
 
 let idTicker: number = 1
 
