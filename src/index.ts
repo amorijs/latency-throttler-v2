@@ -58,8 +58,8 @@ const programStart = async () => {
     const chatControllerOnline = chatController.isRconConnected()
     logInfo(`
     ******* CONNECTION REPORT *******
-      Throttler (${throttler.id}):            ${throttlerOnline ? 'ONLINE' : 'OFFLINE'}
-      Chat Controller (${chatController.id}): ${chatControllerOnline ? 'ONLINE' : 'OFFLINE'}
+      Throttler (#${throttler.id}):       ${throttlerOnline ? 'ONLINE' : 'OFFLINE'}
+      Chat Controller (#${chatController.id}): ${chatControllerOnline ? 'ONLINE' : 'OFFLINE'}
     **********************************
     `)
 
