@@ -36,9 +36,10 @@ export class ChatController {
     logInfo('Parsed chat message:', parsed)
 
     if (parsed.includes('logged in') && parsed.includes('Login:')) {
+      // IE  G6Login: 2023.11.02-10.10.40: foke logged in
       logInfo('Sending', parsed)
-      const loginMessage = parsed.split(':')
-      return this.rcon?.send(`say ${parsed}`)
+      const loginMessage = parsed.split(':').slice(1).join('')
+      return this.rcon?.send(`say ${loginMessage}`)
     }
 
     const [unformattedPlayfab, name, userMessage] = parsed.split(',').map((val) => val.trim())

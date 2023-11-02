@@ -54,14 +54,22 @@ const programStart = async () => {
   await chatController.start()
 
   setInterval(async () => {
-    logInfo(`Checking throttler #${throttler!.id} status`)
+    const throttlerOnline = throttler.isRconConnected()
+    const chatControllerOnline = chatController.isRconConnected()
+    logInfo(`
+    ******* CONNECTION REPORT *******
+      Throttler (${throttler.id}):            ${throttlerOnline ? 'ONLINE' : 'OFFLINE'}
+      Chat Controller (${chatController.id}): ${chatControllerOnline ? 'ONLINE' : 'OFFLINE'}
+    **********************************
+    `)
 
-    if (throttler.isRconConnected()) {
-      return logInfo(`Throttler #${throttler.id} status ok`)
+    if (throttlerOnline && chatControllerOnline) {
+      return
     }
 
+    logInfo('Recreating Throttler & Chat Controller...')
+
     try {
-      logInfo(`Throttler #${throttler.id} disconnected.`)
       throttler.stop()
     } catch (err) {
       logError(`
@@ -71,28 +79,19 @@ const programStart = async () => {
       process.exit(1)
     }
 
-    logInfo('Creating new throttler...')
-    throttler = new Throttler()
-    await throttler.start()
-  }, 15000)
-
-  setInterval(async () => {
-    logInfo(`Checking chat controller #${chatController.id} status`)
-
-    if (chatController.isRconConnected()) {
-      return logInfo(`Chat controller #${chatController.id} status ok`)
-    }
-
     try {
-      logInfo(`Chat controller #${chatController.id} disconnected.`)
       chatController.stop()
     } catch (err) {
       logError(`
-          Could not stop chat controller #${chatController.id}
-          Error: ${JSON.stringify(err ?? {})}
-        `)
+      Could not chat controller #${chatController.id}
+      Error: ${JSON.stringify(err ?? {})}
+    `)
       process.exit(1)
     }
+
+    logInfo('Creating new throttler...')
+    throttler = new Throttler()
+    await throttler.start()
 
     logInfo('Creating new chat controller...')
     chatController = createChatController(throttler)
