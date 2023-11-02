@@ -112,7 +112,7 @@ export class Throttler {
         maxDelayAdded: ${JSON.stringify(this.maxDelayAdded)}
         ****
         pollRate: ${JSON.stringify(this.pollRate)}
-      ****************************************
+      *****************************
     `
     )
   }
