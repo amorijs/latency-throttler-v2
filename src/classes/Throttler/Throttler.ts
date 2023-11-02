@@ -1,4 +1,5 @@
 /* eslint-disable no-plusplus */
+/* eslint-disable array-callback-return */
 
 import { Rcon } from 'rcon-client/lib/rcon'
 import { getRcon, timeProfiler } from '../../utils'
@@ -56,6 +57,14 @@ export class Throttler {
     // For each ip, check if their ping is under minimum. If so, create a traffic rule
     const trafficRules = playerInfoList
       .map((playerInfo) => {
+        // Special check if IP did not exist in Mordhau.log
+        if (playerInfo.ip === null) {
+          this.rcon?.send(
+            `kick ${playerInfo.playfab} Player login invalid. Please reconnect via the server browser.`
+          )
+          return
+        }
+
         this.playfabsToIps[playerInfo.playfab] = playerInfo.ip
 
         const currentDelay = this.playfabsToLastDelay[playerInfo.playfab] ?? 0
@@ -71,8 +80,6 @@ export class Throttler {
         if (currentDelay !== newDelay) {
           return { playerInfo, delay: newDelay }
         }
-
-        return null
       })
       .filter((item) => !!item)
 
