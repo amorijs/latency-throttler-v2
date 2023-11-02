@@ -49,14 +49,7 @@ export class ChatController {
     // Step 1 - check if command is valid
     if (!userMessage.startsWith('.throttle ')) {
       if (userMessage.startsWith('G6Login')) {
-        // Example: G6Login: 2023.11.02-05.23.13: foke logged in
-        const [, , loginMessage] = userMessage.split(':')
-
-        const loginName = loginMessage.replace('logged in', '').trim()
-
-        if (loginName?.length) {
-          return this.rcon?.send(`say ${loginName} has joined the server`)
-        }
+        this.rcon?.send(`say ${userMessage}`)
       }
 
       return logInfo(`Skipping message "${userMessage}"`)
