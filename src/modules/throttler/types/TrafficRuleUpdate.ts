@@ -1,6 +1,6 @@
 import { PlayerInfo } from './PlayerInfo'
 
-export type TrafficRuleUpdate = {
+export type TrafficRule = {
   playerInfo: PlayerInfo
   delay: number
 }

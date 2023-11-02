@@ -34,9 +34,9 @@ const programStart = async () => {
   await throttler.start()
 
   setInterval(async () => {
-    logInfo('Checking throttler rcon connection...')
+    logInfo(`Checking throttler #${throttler.id} status`)
     if (throttler.isRconConnected()) {
-      logInfo('Throttler rcon connected')
+      logInfo(`Throttler #${throttler.id} status ok`)
       return
     }
 

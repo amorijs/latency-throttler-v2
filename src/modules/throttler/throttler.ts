@@ -3,7 +3,7 @@
 import { Rcon } from 'rcon-client/lib/rcon'
 import { getRcon, timeProfiler } from '../../utils'
 import { Queue, addOrChangeRule, deleteAllRules, deleteRule, getPlayerInfoList } from './utils'
-import { TrafficRuleUpdate } from './types'
+import { TrafficRule } from './types'
 
 const { MIN_PING, MAX_DELAY_ADDED, POLL_RATE, TRAFFIC_RULE_UPDATE_RATE }: any = process.env
 
@@ -27,11 +27,11 @@ export class Throttler implements IThrottler {
 
   ipsThrottled: Set<string> = new Set()
 
-  getTrafficRulesInterval?: ReturnType<typeof setInterval>
+  collectRulesInterval?: ReturnType<typeof setInterval>
 
-  executeTrafficRulesInterval?: ReturnType<typeof setInterval>
+  executeNextRuleInterval?: ReturnType<typeof setInterval>
 
-  trafficRuleQueue: Queue<TrafficRuleUpdate> = new Queue()
+  trafficRuleQueue: Queue<TrafficRule> = new Queue()
 
   minPing: number = MIN_PING ? Number.parseInt(`${MIN_PING}`, 10) : 48
 
@@ -42,6 +42,62 @@ export class Throttler implements IThrottler {
   trafficRuleUpdateRate: number = TRAFFIC_RULE_UPDATE_RATE
     ? Number.parseInt(`${TRAFFIC_RULE_UPDATE_RATE}`, 10)
     : 1000
+
+  clearAllIntervals() {
+    if (this.collectRulesInterval) {
+      clearInterval(this.collectRulesInterval)
+      this.collectRulesInterval = undefined
+    }
+
+    if (this.executeNextRuleInterval) {
+      clearInterval(this.executeNextRuleInterval)
+      this.executeNextRuleInterval = undefined
+    }
+  }
+
+  async createTrafficRules(): Promise<TrafficRule[]> {
+    const playerInfoList = await getPlayerInfoList(this.rcon!)
+
+    // For each ip, check if their ping is under minimum. If so, create a traffic rule
+    const delayPromises = playerInfoList.map(async (playerInfo) => {
+      const currentDelay = this.playfabsToLastDelay[playerInfo.playfab] ?? 0
+      const delayToAdd =
+        playerInfo.ping > 0
+          ? Math.min(
+              Math.max(this.minPing - playerInfo.ping, -this.maxDelayAdded),
+              this.maxDelayAdded
+            )
+          : 0
+      const newDelay = Math.max(Math.min(currentDelay + delayToAdd, this.minPing), 0)
+
+      this.playfabsToLastDelay[playerInfo.playfab] = newDelay
+      this.playfabsToIps[playerInfo.playfab] = playerInfo.ip
+
+      if (newDelay > 0 && currentDelay !== newDelay) {
+        return { playerInfo, delay: newDelay }
+      }
+    })
+
+    const trafficRuleUpdates = await Promise.all(delayPromises).then((arr) =>
+      arr.filter((item) => !!item)
+    )
+
+    return trafficRuleUpdates as TrafficRule[]
+  }
+
+  isRconConnected() {
+    return !!this.rcon?.authenticated && !this?.rcon?.socket?.closed
+  }
+
+  log(type: 'info' | 'error', ...args: any[]) {
+    if (type === 'info') {
+      logInfo(...args)
+    } else if (type === 'error') {
+      logError(...args)
+    } else {
+      logError(`Unknown log type: ${type}`)
+    }
+  }
 
   report() {
     logInfo(
@@ -70,32 +126,6 @@ export class Throttler implements IThrottler {
     )
   }
 
-  clearAllIntervals() {
-    if (this.getTrafficRulesInterval) {
-      clearInterval(this.getTrafficRulesInterval)
-      this.getTrafficRulesInterval = undefined
-    }
-
-    if (this.executeTrafficRulesInterval) {
-      clearInterval(this.executeTrafficRulesInterval)
-      this.executeTrafficRulesInterval = undefined
-    }
-  }
-
-  log(type: 'info' | 'error', ...args: any[]) {
-    if (type === 'info') {
-      logInfo(...args)
-    } else if (type === 'error') {
-      logError(...args)
-    } else {
-      logError(`Unknown log type: ${type}`)
-    }
-  }
-
-  isRconConnected() {
-    return !!this.rcon?.authenticated && !this?.rcon?.socket?.closed
-  }
-
   async start() {
     if (this.isRunning) {
       return this.log('error', 'Attempted throttler start while already running')
@@ -112,56 +142,27 @@ export class Throttler implements IThrottler {
 
     this.clearAllIntervals()
 
-    this.getTrafficRulesInterval = setInterval(async () => {
-      await timeProfiler('Getting traffic rules and updating queue', async () => {
-        // Create trafficRuleUpdates
-        const playerInfoList = await getPlayerInfoList(this.rcon!)
+    /* This interval creates and enqueues traffic rules */
+    this.collectRulesInterval = setInterval(async () => {
+      const trafficRules = await this.createTrafficRules()
 
-        // For each ip, check if their ping is under minimum. If so, create a traffic rule
-        const delayPromises = playerInfoList.map(
-          async (playerInfo): Promise<TrafficRuleUpdate | undefined> => {
-            const currentDelay = this.playfabsToLastDelay[playerInfo.playfab] ?? 0
-            const delayToAdd =
-              playerInfo.ping > 0
-                ? Math.min(
-                    Math.max(this.minPing - playerInfo.ping, -this.maxDelayAdded),
-                    this.maxDelayAdded
-                  )
-                : 0
-            const newDelay = Math.max(Math.min(currentDelay + delayToAdd, this.minPing), 0)
-
-            this.playfabsToLastDelay[playerInfo.playfab] = newDelay
-            this.playfabsToIps[playerInfo.playfab] = playerInfo.ip
-
-            if (newDelay > 0 && currentDelay !== newDelay) {
-              return { playerInfo, delay: newDelay }
-            }
-          }
-        )
-
-        const trafficRuleUpdates = await Promise.all(delayPromises).then(
-          (arr) => arr.filter((item) => !!item) as TrafficRuleUpdate[]
-        )
-
-        trafficRuleUpdates.forEach((trafficRuleUpdate) => {
-          const indexOfItemInQueue = this.trafficRuleQueue.findItemIndex((queueItem) => {
-            return queueItem.playerInfo.ip === trafficRuleUpdate.playerInfo.ip
-          })
-
-          if (indexOfItemInQueue === -1) {
-            this.trafficRuleQueue.enqueue(trafficRuleUpdate)
-          } else {
-            this.trafficRuleQueue.updateIndex(indexOfItemInQueue, trafficRuleUpdate)
-          }
+      trafficRules.forEach((trafficRule) => {
+        const indexOfItemInQueue = this.trafficRuleQueue.findItemIndex((queueItem) => {
+          return queueItem.playerInfo.ip === trafficRule.playerInfo.ip
         })
 
-        playerInfoList.forEach(({ ip, ping, playfab }) => {})
-
-        this.report()
+        if (indexOfItemInQueue === -1) {
+          this.trafficRuleQueue.enqueue(trafficRule)
+        } else {
+          this.trafficRuleQueue.updateIndex(indexOfItemInQueue, trafficRule)
+        }
       })
+
+      this.report()
     }, this.pollRate)
 
-    this.executeTrafficRulesInterval = setInterval(async () => {
+    /* This interval just executes the traffic rule at the top of the queue, if one exists */
+    this.executeNextRuleInterval = setInterval(async () => {
       const trafficRuleUpdate = this.trafficRuleQueue.dequeue()
 
       if (!trafficRuleUpdate) {
