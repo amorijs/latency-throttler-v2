@@ -94,7 +94,7 @@ export class Throttler {
     logInfo(
       'info',
       `
-      **** THROTTLER #${this.id} REPORT ****
+      ********** THROTTLER #${this.id} REPORT **********
         id: ${this.id}
         ****
         rcon status: ${this.isRconConnected() ? 'connected' : 'not connected'}
@@ -112,7 +112,7 @@ export class Throttler {
         maxDelayAdded: ${JSON.stringify(this.maxDelayAdded)}
         ****
         pollRate: ${JSON.stringify(this.pollRate)}
-      *****************************
+      *****************************************
     `
     )
   }
