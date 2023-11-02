@@ -38,6 +38,8 @@ export class ChatController {
 
     const [unformattedPlayfab, name, userMessage] = parsed.split(',').map((val) => val.trim())
 
+    console.log({ userMessage })
+
     if (userMessage.includes('logged in') && userMessage.includes('Login:')) {
       logInfo('Sending', userMessage)
       return this.rcon?.send(`say ${userMessage}`)
