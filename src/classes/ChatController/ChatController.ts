@@ -70,7 +70,7 @@ export class ChatController {
       return logError(message)
     }
 
-    this.onSetMinPing?.(minPingAsNum)
+    await this.onSetMinPing?.(minPingAsNum)
     this.rcon?.send(`Say min ping set to ${minPingAsNum}`)
   }
 

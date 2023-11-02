@@ -39,7 +39,7 @@ const programStart = async () => {
 
   chatController.onSetMinPing = async (minPing: number) => {
     try {
-      await deleteAllRules()
+      await deleteAllRules().catch(() => {})
       throttler.setMinPing(minPing)
       logInfo(`Set throttler #${throttler.id} min ping to ${minPing}`)
     } catch (err) {
