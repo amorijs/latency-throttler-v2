@@ -71,7 +71,7 @@ export class ChatController {
     }
 
     this.onSetMinPing?.(minPingAsNum)
-    this.rcon?.send(`Say successfully set min ping to ${minPingAsNum}`)
+    this.rcon?.send(`Say min ping set to ${minPingAsNum}`)
   }
 
   async start() {

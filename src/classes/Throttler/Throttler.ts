@@ -111,6 +111,10 @@ export class Throttler {
     )
   }
 
+  setMinPing(minPing: number) {
+    this.minPing = minPing
+  }
+
   async start() {
     if (this.isRunning) {
       return logError('Attempted throttler start while already running')
