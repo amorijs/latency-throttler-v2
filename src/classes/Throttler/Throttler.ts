@@ -54,29 +54,29 @@ export class Throttler {
     const playerInfoList = await getPlayerInfoList(this.rcon!)
 
     // For each ip, check if their ping is under minimum. If so, create a traffic rule
-    const delayPromises = playerInfoList.map(async (playerInfo) => {
-      this.playfabsToIps[playerInfo.playfab] = playerInfo.ip
+    const trafficRules = playerInfoList
+      .map((playerInfo) => {
+        this.playfabsToIps[playerInfo.playfab] = playerInfo.ip
 
-      const currentDelay = this.playfabsToLastDelay[playerInfo.playfab] ?? 0
-      const delayToAdd =
-        playerInfo.ping > 0
-          ? Math.min(
-              Math.max(this.minPing - playerInfo.ping, -this.maxDelayAdded),
-              this.maxDelayAdded
-            )
-          : 0
-      const newDelay = Math.max(Math.min(currentDelay + delayToAdd, this.minPing), 0)
+        const currentDelay = this.playfabsToLastDelay[playerInfo.playfab] ?? 0
+        const delayToAdd =
+          playerInfo.ping > 0
+            ? Math.min(
+                Math.max(this.minPing - playerInfo.ping, -this.maxDelayAdded),
+                this.maxDelayAdded
+              )
+            : 0
+        const newDelay = Math.max(Math.min(currentDelay + delayToAdd, this.minPing), 0)
 
-      if (currentDelay !== newDelay) {
-        return { playerInfo, delay: newDelay }
-      }
-    })
+        if (currentDelay !== newDelay) {
+          return { playerInfo, delay: newDelay }
+        }
 
-    const trafficRuleUpdates = await Promise.all(delayPromises).then((arr) =>
-      arr.filter((item) => !!item)
-    )
+        return null
+      })
+      .filter((item) => !!item)
 
-    return trafficRuleUpdates as TrafficRule[]
+    return trafficRules as TrafficRule[]
   }
 
   isRconConnected() {
