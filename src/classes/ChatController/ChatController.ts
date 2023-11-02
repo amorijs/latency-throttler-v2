@@ -32,18 +32,16 @@ export class ChatController {
       this.rcon?.send('say Throttler not initialized...')
       return logError('onSetMinPing not initialized')
     }
-    const parsed = parseBuffer(buffer)
 
+    const parsed = parseBuffer(buffer)
     logInfo('Parsed chat message:', parsed)
 
-    const [unformattedPlayfab, name, userMessage] = parsed.split(',').map((val) => val.trim())
-
-    console.log({ userMessage })
-
-    if (userMessage.includes('logged in') && userMessage.includes('Login:')) {
-      logInfo('Sending', userMessage)
-      return this.rcon?.send(`say ${userMessage}`)
+    if (parsed.includes('logged in') && parsed.includes('Login:')) {
+      logInfo('Sending', parsed)
+      return this.rcon?.send(`say ${parsed}`)
     }
+
+    const [unformattedPlayfab, name, userMessage] = parsed.split(',').map((val) => val.trim())
 
     const formattedPlayfab = unformattedPlayfab.split(' ')[1]
 
