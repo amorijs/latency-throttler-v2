@@ -46,7 +46,7 @@ export class ChatController {
     if (parsed.includes('logged in') && parsed.includes('Login:')) {
       // IE  G6Login: 2023.11.02-10.10.40: foke logged in
       logInfo('Sending', parsed)
-      const loginMessage = parsed.split(':').slice(1).join('')
+      const loginMessage = parsed.split(':').slice(2).join('')
       const formatted = loginMessage.replace('logged in', 'has joined the server')
       return this.rcon?.send(`say ${formatted}`)
     }
