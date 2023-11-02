@@ -48,12 +48,13 @@ export class ChatController {
 
     // Step 1 - check if command is valid
     if (!userMessage.startsWith('.throttle ')) {
-      if (userMessage.includes('Login:')) {
-        logInfo('Sending', userMessage)
-        this.rcon?.send(`say ${userMessage}`)
-      } else {
-        logInfo('wtf??', { userMessage })
-      }
+      // if (userMessage.includes('Login:')) {
+      //   logInfo('Sending', userMessage)
+      //   this.rcon?.send(`say ${userMessage}`)
+      // } else {
+      //   logInfo('wtf??', { userMessage })
+      // }
+      console.log({ userMessage })
 
       return logInfo(`Skipping message "${userMessage}"`)
     }
