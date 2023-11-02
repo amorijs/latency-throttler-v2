@@ -1,7 +1,7 @@
 import { formatISO9075, sub } from 'date-fns'
 import dotenv from 'dotenv'
-import { Throttler } from './modules/throttler/throttler'
-import { deleteAllRules } from './modules/throttler/utils'
+import { Throttler } from './classes/Throttler/Throttler'
+import { ChatController } from './classes/ChatController/ChatController'
 
 dotenv.config()
 
@@ -31,13 +31,21 @@ process.on('unhandledRejection', (reason, promise) => {
 
 const programStart = async () => {
   let throttler = new Throttler()
+  let chatController = new ChatController()
+
   await throttler.start()
+  await chatController.start()
+
+  chatController.onSetMinPing = (minPing: number) => {
+    throttler.minPing = minPing
+    logInfo(`Set throttler #${throttler.id} min ping to ${minPing}`)
+  }
 
   setInterval(async () => {
-    logInfo(`Checking throttler #${throttler.id} status`)
+    logInfo(`Checking throttler #${throttler!.id} status`)
+
     if (throttler.isRconConnected()) {
-      logInfo(`Throttler #${throttler.id} status ok`)
-      return
+      return logInfo(`Throttler #${throttler.id} status ok`)
     }
 
     try {
@@ -56,7 +64,28 @@ const programStart = async () => {
     await throttler.start()
   }, 15000)
 
-  // let rconChatHandler = null
+  setInterval(async () => {
+    logInfo(`Checking chat controller #${chatController.id} status`)
+
+    if (chatController.isRconConnected()) {
+      return logInfo(`Chat controller #${chatController.id} status ok`)
+    }
+
+    try {
+      logInfo(`Chat controller #${chatController.id} disconnected.`)
+      chatController.stop()
+    } catch (err) {
+      logError(`
+          Could not stop chat controller #${chatController.id}
+          Error: ${JSON.stringify(err ?? {})}
+        `)
+      process.exit(1)
+    }
+
+    logInfo('Creating new chat controller...')
+    chatController = new ChatController()
+    await chatController.start()
+  }, 15000)
 }
 
 programStart()

@@ -2,19 +2,14 @@
 
 import { Rcon } from 'rcon-client/lib/rcon'
 import { getRcon, timeProfiler } from '../../utils'
-import { Queue, addOrChangeRule, deleteAllRules, deleteRule, getPlayerInfoList } from './utils'
+import { Queue, addOrChangeRule, deleteAllRules, deleteRule, getPlayerInfoList } from './helpers'
 import { TrafficRule } from './types'
 
 const { MIN_PING, MAX_DELAY_ADDED, POLL_RATE, TRAFFIC_RULE_UPDATE_RATE }: any = process.env
 
-interface IThrottler {
-  start: () => void
-  isRconConnected: () => boolean
-}
-
 let idTicker = 1
 
-export class Throttler implements IThrottler {
+export class Throttler {
   id: number = idTicker++
 
   isRunning: boolean = false
@@ -89,16 +84,6 @@ export class Throttler implements IThrottler {
     return !!this.rcon?.authenticated && !this?.rcon?.socket?.closed
   }
 
-  log(type: 'info' | 'error', ...args: any[]) {
-    if (type === 'info') {
-      logInfo(...args)
-    } else if (type === 'error') {
-      logError(...args)
-    } else {
-      logError(`Unknown log type: ${type}`)
-    }
-  }
-
   report() {
     logInfo(
       'info',
@@ -128,7 +113,7 @@ export class Throttler implements IThrottler {
 
   async start() {
     if (this.isRunning) {
-      return this.log('error', 'Attempted throttler start while already running')
+      return logError('Attempted throttler start while already running')
     }
 
     this.isRunning = true
@@ -189,6 +174,7 @@ export class Throttler implements IThrottler {
     this.clearAllIntervals()
     this.rcon?.socket?.removeAllListeners()
     this.rcon?.socket?.destroy()
+    deleteAllRules().catch(logError)
     this.isRunning = false
   }
 }
