@@ -38,8 +38,9 @@ export class ChatController {
 
     const [unformattedPlayfab, name, userMessage] = parsed.split(',').map((val) => val.trim())
 
-    if (!unformattedPlayfab || !userMessage) {
-      return
+    if (userMessage.includes('logged in') && userMessage.includes('Login:')) {
+      logInfo('Sending', userMessage)
+      return this.rcon?.send(`say ${userMessage}`)
     }
 
     const formattedPlayfab = unformattedPlayfab.split(' ')[1]
@@ -47,15 +48,7 @@ export class ChatController {
     // G6Login: 2023.11.02-05.23.13: foke logged in
 
     // Step 1 - check if command is valid
-    if (!userMessage.startsWith('.throttle ')) {
-      // if (userMessage.includes('Login:')) {
-      //   logInfo('Sending', userMessage)
-      //   this.rcon?.send(`say ${userMessage}`)
-      // } else {
-      //   logInfo('wtf??', { userMessage })
-      // }
-      console.log({ userMessage })
-
+    if (!userMessage?.startsWith('.throttle ')) {
       return logInfo(`Skipping message "${userMessage}"`)
     }
 
