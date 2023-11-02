@@ -29,7 +29,6 @@ export class ChatController {
 
   async handleOnData(buffer: Buffer) {
     if (!this.onSetMinPing) {
-      this.rcon?.send('say Throttler not initialized...')
       return logError('onSetMinPing not initialized')
     }
 
