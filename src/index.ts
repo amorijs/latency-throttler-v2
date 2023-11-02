@@ -30,12 +30,8 @@ process.on('unhandledRejection', (reason, promise) => {
   logInfo('UNHANDLED REJECTION', { reason, promise })
 })
 
-const programStart = async () => {
-  let throttler = new Throttler()
-  let chatController = new ChatController()
-
-  await throttler.start()
-  await chatController.start()
+const createChatController = (throttler: Throttler): ChatController => {
+  const chatController = new ChatController()
 
   chatController.onSetMinPing = async (minPing: number) => {
     try {
@@ -46,6 +42,16 @@ const programStart = async () => {
       logError('Error while setting min ping', err)
     }
   }
+
+  return chatController
+}
+
+const programStart = async () => {
+  let throttler = new Throttler()
+  let chatController = createChatController(throttler)
+
+  await throttler.start()
+  await chatController.start()
 
   setInterval(async () => {
     logInfo(`Checking throttler #${throttler!.id} status`)
@@ -89,7 +95,7 @@ const programStart = async () => {
     }
 
     logInfo('Creating new chat controller...')
-    chatController = new ChatController()
+    chatController = createChatController(throttler)
     await chatController.start()
   }, 15000)
 }
