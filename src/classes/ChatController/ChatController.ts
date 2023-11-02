@@ -49,6 +49,7 @@ export class ChatController {
     // Step 1 - check if command is valid
     if (!userMessage.startsWith('.throttle ')) {
       if (userMessage.startsWith('G6Login')) {
+        logInfo('Sending', userMessage)
         this.rcon?.send(`say ${userMessage}`)
       }
 
