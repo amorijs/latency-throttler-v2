@@ -67,7 +67,7 @@ export class Throttler {
           : 0
       const newDelay = Math.max(Math.min(currentDelay + delayToAdd, this.minPing), 0)
 
-      if (newDelay > 0 && currentDelay !== newDelay) {
+      if (currentDelay !== newDelay) {
         return { playerInfo, delay: newDelay }
       }
     })
