@@ -47,7 +47,8 @@ export class ChatController {
       // IE  G6Login: 2023.11.02-10.10.40: foke logged in
       logInfo('Sending', parsed)
       const loginMessage = parsed.split(':').slice(1).join('')
-      return this.rcon?.send(`say ${loginMessage}`)
+      const formatted = loginMessage.replace('logged in', 'has joined the server')
+      return this.rcon?.send(`say ${formatted}`)
     }
 
     const [unformattedPlayfab, name, userMessage] = parsed.split(',').map((val) => val.trim())
