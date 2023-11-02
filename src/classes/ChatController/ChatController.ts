@@ -29,7 +29,7 @@ export class ChatController {
 
   async handleOnData(buffer: Buffer) {
     if (!this.onSetMinPing) {
-      this.rcon?.send('Throttler not initialized...')
+      this.rcon?.send('say Throttler not initialized...')
       return logError('onSetMinPing not initialized')
     }
     const parsed = parseBuffer(buffer)
@@ -44,8 +44,21 @@ export class ChatController {
 
     const formattedPlayfab = unformattedPlayfab.split(' ')[1]
 
+    // G6Login: 2023.11.02-05.23.13: foke logged in
+
     // Step 1 - check if command is valid
     if (!userMessage.startsWith('.throttle ')) {
+      if (userMessage.startsWith('G6Login')) {
+        // Example: G6Login: 2023.11.02-05.23.13: foke logged in
+        const [, , loginMessage] = userMessage.split(':')
+
+        const loginName = loginMessage.replace('logged in', '').trim()
+
+        if (loginName?.length) {
+          return this.rcon?.send(`say ${loginName} has joined the server`)
+        }
+      }
+
       return logInfo(`Skipping message "${userMessage}"`)
     }
 
@@ -61,7 +74,7 @@ export class ChatController {
     const minPingAsNum = Number.parseInt(minPing, 10)
 
     if (Number.isNaN(minPingAsNum)) {
-      const message = `Invalid min ping provided: ${minPing}`
+      const message = `say Invalid min ping provided: ${minPing}`
       this.rcon?.send(message)
       return logError(message)
     }
