@@ -39,7 +39,7 @@ export class Throttler {
     ? Number.parseInt(`${TRAFFIC_RULE_UPDATE_RATE}`, 10)
     : 1000
 
-  clearAllIntervals() {
+  clearAllIntervals(): void {
     if (this.collectRulesInterval) {
       clearInterval(this.collectRulesInterval)
       this.collectRulesInterval = undefined
@@ -172,7 +172,7 @@ export class Throttler {
         await addOrChangeRule(ip, trafficRuleUpdate.delay)
         this.playfabsToLastDelay[trafficRuleUpdate.playerInfo.playfab] = trafficRuleUpdate.delay
         this.ipsThrottled.add(ip)
-      } else if (this.ipsThrottled.has(ip)) {
+      } else {
         await deleteRule(ip)
         this.playfabsToLastDelay[trafficRuleUpdate.playerInfo.playfab] = 0
         this.ipsThrottled.delete(ip)
