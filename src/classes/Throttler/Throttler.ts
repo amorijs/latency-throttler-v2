@@ -172,7 +172,7 @@ export class Throttler {
         await addOrChangeRule(ip, trafficRuleUpdate.delay)
         this.playfabsToLastDelay[trafficRuleUpdate.playerInfo.playfab] = trafficRuleUpdate.delay
         this.ipsThrottled.add(ip)
-      } else {
+      } else if (this.ipsThrottled.has(ip)) {
         await deleteRule(ip)
         this.playfabsToLastDelay[trafficRuleUpdate.playerInfo.playfab] = 0
         this.ipsThrottled.delete(ip)
