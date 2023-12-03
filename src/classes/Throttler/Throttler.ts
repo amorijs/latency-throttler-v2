@@ -197,7 +197,7 @@ export class Throttler {
       console.log('before')
       await this.executeNextRule().catch(logError)
       console.log('after')
-      setTimeout(() => this.executeNextRule(), this.trafficRuleUpdateRate)
+      setTimeout(() => startExecutionInterval(), this.trafficRuleUpdateRate)
     }
 
     startCollectionInterval()
