@@ -130,6 +130,8 @@ export class Throttler {
   async executeNextRule() {
     const trafficRuleUpdate = this.trafficRuleQueue.dequeue()
 
+    console.log({ trafficRuleUpdate })
+
     if (!trafficRuleUpdate) {
       return
     }
@@ -170,7 +172,7 @@ export class Throttler {
       }
 
       await this.collectRules().catch(logError)
-      setTimeout(startCollectionInterval, this.pollRate)
+      setTimeout(() => startCollectionInterval(), this.pollRate)
     }
 
     /* This interval just executes the traffic rule at the top of the queue, if one exists */
