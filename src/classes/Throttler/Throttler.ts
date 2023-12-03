@@ -167,6 +167,7 @@ export class Throttler {
 
     /* This interval creates and enqueues traffic rules */
     const startCollectionInterval = async () => {
+      console.log({ running22: this.isRunning })
       if (!this.isRunning) {
         return
       }
@@ -177,6 +178,7 @@ export class Throttler {
 
     /* This interval just executes the traffic rule at the top of the queue, if one exists */
     const startExecutionInterval = async () => {
+      console.log({ running: this.isRunning })
       if (!this.isRunning) {
         return
       }
