@@ -130,8 +130,6 @@ export class Throttler {
   async executeNextRule() {
     const trafficRuleUpdate = this.trafficRuleQueue.dequeue()
 
-    console.log({ trafficRuleUpdate })
-
     if (!trafficRuleUpdate) {
       return
     }
@@ -167,7 +165,6 @@ export class Throttler {
 
     /* This interval creates and enqueues traffic rules */
     const startCollectionInterval = async () => {
-      console.log({ running22: this.isRunning })
       if (!this.isRunning) {
         return
       }
@@ -178,25 +175,11 @@ export class Throttler {
 
     /* This interval just executes the traffic rule at the top of the queue, if one exists */
     const startExecutionInterval = async () => {
-      console.log('##########################')
-      console.log('##########################')
-      console.log('##########################')
-      console.log('##########################')
-      console.log('##########################')
-      console.log({ running: this.isRunning })
-      console.log('##########################')
-      console.log('##########################')
-      console.log('##########################')
-      console.log('##########################')
-      console.log('##########################')
-
       if (!this.isRunning) {
         return
       }
 
-      console.log('before')
       await this.executeNextRule().catch(logError)
-      console.log('after')
       setTimeout(() => startExecutionInterval(), this.trafficRuleUpdateRate)
     }
 
