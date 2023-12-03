@@ -36,6 +36,10 @@ export class ChatController {
   }
 
   async handleOnData(buffer: Buffer) {
+    if (!this.isRunning) {
+      return
+    }
+
     if (!this.onSetMinPing) {
       return logError('onSetMinPing not initialized')
     }
@@ -95,8 +99,8 @@ export class ChatController {
   }
 
   async stop() {
+    this.isRunning = false
     this.rcon?.socket?.removeAllListeners()
     this.rcon?.socket?.destroy()
-    this.isRunning = false
   }
 }

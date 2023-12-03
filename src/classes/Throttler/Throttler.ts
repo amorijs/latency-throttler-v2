@@ -39,18 +39,6 @@ export class Throttler {
     ? Number.parseInt(`${TRAFFIC_RULE_UPDATE_RATE}`, 10)
     : 1000
 
-  clearAllIntervals(): void {
-    if (this.collectRulesInterval) {
-      clearInterval(this.collectRulesInterval)
-      this.collectRulesInterval = undefined
-    }
-
-    if (this.executeNextRuleInterval) {
-      clearInterval(this.executeNextRuleInterval)
-      this.executeNextRuleInterval = undefined
-    }
-  }
-
   async createTrafficRules(): Promise<TrafficRule[]> {
     const playerInfoList = await getPlayerInfoList(this.rcon!)
 
@@ -121,6 +109,46 @@ export class Throttler {
     this.minPing = minPing
   }
 
+  async collectRules() {
+    const trafficRules = await this.createTrafficRules()
+
+    trafficRules.forEach((trafficRule) => {
+      const indexOfItemInQueue = this.trafficRuleQueue.findItemIndex((queueItem) => {
+        return queueItem.playerInfo.ip === trafficRule.playerInfo.ip
+      })
+
+      if (indexOfItemInQueue === -1) {
+        this.trafficRuleQueue.enqueue(trafficRule)
+      } else {
+        this.trafficRuleQueue.updateIndex(indexOfItemInQueue, trafficRule)
+      }
+    })
+
+    this.report()
+  }
+
+  async executeNextRule() {
+    const trafficRuleUpdate = this.trafficRuleQueue.dequeue()
+
+    if (!trafficRuleUpdate) {
+      return
+    }
+
+    const {
+      playerInfo: { ip }
+    } = trafficRuleUpdate
+
+    if (trafficRuleUpdate.delay > 0) {
+      await addOrChangeRule(ip, trafficRuleUpdate.delay)
+      this.playfabsToLastDelay[trafficRuleUpdate.playerInfo.playfab] = trafficRuleUpdate.delay
+      this.ipsThrottled.add(ip)
+    } else if (this.ipsThrottled.has(ip)) {
+      await deleteRule(ip)
+      this.playfabsToLastDelay[trafficRuleUpdate.playerInfo.playfab] = 0
+      this.ipsThrottled.delete(ip)
+    }
+  }
+
   async start() {
     if (this.isRunning) {
       return logError('Attempted throttler start while already running')
@@ -135,58 +163,37 @@ export class Throttler {
       throw new Error('RCON not connected')
     }
 
-    this.clearAllIntervals()
-
     /* This interval creates and enqueues traffic rules */
-    this.collectRulesInterval = setInterval(async () => {
-      const trafficRules = await this.createTrafficRules()
-
-      trafficRules.forEach((trafficRule) => {
-        const indexOfItemInQueue = this.trafficRuleQueue.findItemIndex((queueItem) => {
-          return queueItem.playerInfo.ip === trafficRule.playerInfo.ip
-        })
-
-        if (indexOfItemInQueue === -1) {
-          this.trafficRuleQueue.enqueue(trafficRule)
-        } else {
-          this.trafficRuleQueue.updateIndex(indexOfItemInQueue, trafficRule)
-        }
-      })
-
-      this.report()
-    }, this.pollRate)
-
-    /* This interval just executes the traffic rule at the top of the queue, if one exists */
-    this.executeNextRuleInterval = setInterval(async () => {
-      const trafficRuleUpdate = this.trafficRuleQueue.dequeue()
-
-      if (!trafficRuleUpdate) {
+    const startCollectionInterval = async () => {
+      if (!this.isRunning) {
         return
       }
 
-      const {
-        playerInfo: { ip }
-      } = trafficRuleUpdate
+      await this.collectRules().catch(logError)
+      setTimeout(startCollectionInterval, this.pollRate)
+    }
 
-      if (trafficRuleUpdate.delay > 0) {
-        await addOrChangeRule(ip, trafficRuleUpdate.delay)
-        this.playfabsToLastDelay[trafficRuleUpdate.playerInfo.playfab] = trafficRuleUpdate.delay
-        this.ipsThrottled.add(ip)
-      } else if (this.ipsThrottled.has(ip)) {
-        await deleteRule(ip)
-        this.playfabsToLastDelay[trafficRuleUpdate.playerInfo.playfab] = 0
-        this.ipsThrottled.delete(ip)
+    /* This interval just executes the traffic rule at the top of the queue, if one exists */
+    const startExecutionInterval = async () => {
+      if (!this.isRunning) {
+        return
       }
-    }, this.trafficRuleUpdateRate)
+
+      await this.executeNextRule().catch(logError)
+      setTimeout(this.executeNextRule, this.trafficRuleUpdateRate)
+    }
+
+    await startCollectionInterval()
+    startExecutionInterval()
 
     logInfo('Throttler started!')
   }
 
   stop() {
-    this.clearAllIntervals()
+    logInfo(`------------  Stopping throttler #${this.id}  -------------`)
+    this.isRunning = false
     this.rcon?.socket?.removeAllListeners()
     this.rcon?.socket?.destroy()
     deleteAllRules().catch(logError)
-    this.isRunning = false
   }
 }
