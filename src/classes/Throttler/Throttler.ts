@@ -83,6 +83,9 @@ export class Throttler {
       'info',
       `
       ********** THROTTLER #${this.id} REPORT **********
+        ****
+        isRunning: ${this.isRunning} -- THIS SHOULD ALWAYS SAY "true"
+        ****
         id: ${this.id}
         ****
         rcon status: ${this.isRconConnected() ? 'connected' : 'not connected'}
