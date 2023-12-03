@@ -189,7 +189,7 @@ export class Throttler {
       setTimeout(() => this.executeNextRule(), this.trafficRuleUpdateRate)
     }
 
-    await startCollectionInterval()
+    startCollectionInterval()
     startExecutionInterval()
 
     logInfo('Throttler started!')
