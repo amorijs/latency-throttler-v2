@@ -23,7 +23,7 @@ export const getPlayerInfoList = async (rcon: Rcon): Promise<PlayerInfo[]> => {
     const ip = playfabsToIps[playfab]
 
     if (!ip || !ip.length) {
-      logInfo(`Did not have IP for  playfab ${playfab}`)
+      logError(`Did not have IP for  playfab ${playfab}`)
       return { ip: null, playfab, ping }
     }
 

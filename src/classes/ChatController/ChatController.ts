@@ -45,11 +45,9 @@ export class ChatController {
     }
 
     const parsed = parseBuffer(buffer)
-    logInfo('Parsed chat message:', parsed)
 
     if (parsed.includes('logged in') && parsed.includes('Login:')) {
       // IE  G6Login: 2023.11.02-10.10.40: foke logged in
-      logInfo('Sending', parsed)
       return this.rcon?.send(`say ${parsed}`)
     }
 
@@ -61,7 +59,7 @@ export class ChatController {
 
     // Step 1 - check if command is valid
     if (!userMessage?.startsWith('.throttle ')) {
-      return logInfo(`Skipping message "${userMessage}"`)
+      return
     }
 
     // Step 2 - check if user is authorized

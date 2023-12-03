@@ -17,27 +17,22 @@ export const getNetworkInterfaceId = async (): Promise<string> => {
     }, 30000)
   }
 
-  logInfo(`NETWORK INTERFACE ID:`, cachedNetworkInterfaceId)
   return cachedNetworkInterfaceId as string
 }
 
 export const addOrChangeRule = async (ip: string, amountOfDelayToAdd: number): Promise<void> => {
-  logInfo(`addOrChangeRule`, { ip, amountOfDelayToAdd })
   const networkInterfaceId = await getNetworkInterfaceId()
   const command = `tcset ${networkInterfaceId} --src-network ${ip}/32 --delay ${amountOfDelayToAdd}ms --change`
   return execPromise(command)
 }
 
 export const deleteRule = async (ip: string): Promise<void> => {
-  logInfo(`deleteRule`, { ip })
   const networkInterfaceId = await getNetworkInterfaceId()
   const command = `tcdel ${networkInterfaceId} --src-network ${ip}/32`
   return execPromise(command).catch(() => {})
 }
 
 export const deleteAllRules = async (): Promise<void> => {
-  logInfo(`deleteAllRules`)
-
   try {
     const networkInterfaceId = await getNetworkInterfaceId()
     const command = `tcdel ${networkInterfaceId} --all`
