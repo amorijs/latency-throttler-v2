@@ -68,19 +68,20 @@ const programStart = async () => {
       return
     }
 
-    try {
-      throttler.stop()
-    } catch (err) {
-      logError(`
-          Could not stop throttler #${throttler.id}
-          Error: ${JSON.stringify(err ?? {})}
-        `)
-      process.exit(1)
+    if (!throttlerOnline) {
+      try {
+        throttler.stop()
+        logInfo('Creating new throttler...')
+        throttler = new Throttler()
+        await throttler.start()
+      } catch (err) {
+        logError(`
+            Could not stop throttler #${throttler.id}
+            Error: ${JSON.stringify(err ?? {})}
+          `)
+        process.exit(1)
+      }
     }
-
-    logInfo('Creating new throttler...')
-    throttler = new Throttler()
-    await throttler.start()
 
     try {
       chatController.stop()
