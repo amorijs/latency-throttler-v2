@@ -178,7 +178,18 @@ export class Throttler {
 
     /* This interval just executes the traffic rule at the top of the queue, if one exists */
     const startExecutionInterval = async () => {
+      console.log('##########################')
+      console.log('##########################')
+      console.log('##########################')
+      console.log('##########################')
+      console.log('##########################')
       console.log({ running: this.isRunning })
+      console.log('##########################')
+      console.log('##########################')
+      console.log('##########################')
+      console.log('##########################')
+      console.log('##########################')
+
       if (!this.isRunning) {
         return
       }
