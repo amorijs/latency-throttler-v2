@@ -180,7 +180,7 @@ export class Throttler {
       }
 
       await this.executeNextRule().catch(logError)
-      setTimeout(this.executeNextRule, this.trafficRuleUpdateRate)
+      setTimeout(() => this.executeNextRule(), this.trafficRuleUpdateRate)
     }
 
     await startCollectionInterval()
