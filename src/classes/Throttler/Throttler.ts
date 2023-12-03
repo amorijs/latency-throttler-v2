@@ -85,34 +85,34 @@ export class Throttler {
       ********** THROTTLER #${this.id} REPORT **********
         
         isRunning
-          ${this.isRunning} -- THIS SHOULD ALWAYS SAY "true"
+        ->  ${this.isRunning} -- THIS SHOULD ALWAYS SAY "true"
         
         id
-          ${this.id}
+        ->  ${this.id}
         
         rcon status
-          ${this.isRconConnected() ? 'connected' : 'not connected'}
+        ->  ${this.isRconConnected() ? 'connected' : 'not connected'}
         
         playfabsToLastDelay
-          ${JSON.stringify(this.playfabsToLastDelay)}
+        ->  ${JSON.stringify(this.playfabsToLastDelay)}
         
         playFabsToIps
-          ${JSON.stringify(this.playfabsToIps)}
+        ->  ${JSON.stringify(this.playfabsToIps)}
         
         ipsThrottled
-          ${JSON.stringify(this.ipsThrottled)}
+        ->  ${JSON.stringify(this.ipsThrottled)}
         
         trafficRuleQueue
-          ${JSON.stringify(this.trafficRuleQueue.queue)}
+        ->  ${JSON.stringify(this.trafficRuleQueue.queue)}
         
         minPing
-          ${JSON.stringify(this.minPing)}
+        ->  ${JSON.stringify(this.minPing)}
         
         maxDelayAdded
-          ${JSON.stringify(this.maxDelayAdded)}
+        ->  ${JSON.stringify(this.maxDelayAdded)}
         
         pollRate
-          ${JSON.stringify(this.pollRate)}
+        ->  ${JSON.stringify(this.pollRate)}
 
       *****************************************
     `
